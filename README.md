@@ -1,0 +1,3 @@
+This is the first course that I started pursuing in the [Open Source Society's Online Bachelor in Computer Science](https://github.com/open-source-society/computer-science) degree.
+
+Here is the link to my [public web-app page](https://ossu.firebaseapp.com/#/profile/72iOrWWp2ZhYBHWpWYVShR9Xal93) where you can track my progress with this and other courses and also see links to other related repositories.
