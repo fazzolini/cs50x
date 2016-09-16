@@ -1,8 +1,21 @@
+/**
+ * greedy.c
+ * this is part of CS50X pset1
+ *
+ * Otto Brut
+ * fazzolini@gmail.com
+ *
+ * version: 1.01
+ *
+ * Calculates how many coins of change you will get.
+ */
+
 #include <cs50.h>
 #include <stdio.h>
 
 int main(void)
 {
+
 	// first deal with input
 	printf("O hai! ");
 	float raw_input;
@@ -13,17 +26,16 @@ int main(void)
 	}
 	while(raw_input < 0.0);
 
-    /*
-    ** now it gets UGLY
-    ** this is to deal with 4.2 * 100 = 419.999
-    ** SERISLY, WAT DA FUK, C?!
-    */
+    /**
+     * now it gets UGLY
+     * this is to deal with 4.2 * 100 = 419.999
+     * SERISLY, WAT DA FUK, C?!
+     */
     int thousands = (int)(raw_input * 1000);
     int cents = thousands / 10;
     int remainder = thousands % 10;
     if (remainder == 9) cents++;
 
-	// now the algo itself
 	// while there is change
 	int result = 0;
 	while(cents)
@@ -49,4 +61,5 @@ int main(void)
 
 	// produce result to the user on screen
 	printf("%d\n", result);
+	
 }
