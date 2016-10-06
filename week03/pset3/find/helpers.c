@@ -35,9 +35,30 @@ bool search(int value, int values[], int n)
 
 /**
  * Sorts array of n values.
+ * NB!: arrays are passed by reference
+ * and not by value (copy)
  */
 void sort(int values[], int n)
 {
-    // TODO: implement an O(n^2) sorting algorithm
+    // implementing a bubble sort
+    int swapped = -1;
+    while (swapped != 0)
+    {
+        // re-assign swapped to 0
+        swapped = 0;
+        // pass-through array performing swaps
+        // go up to the element before last
+        for (int i = 0; i < n - 1; i++)
+        {
+            // swap if out of order
+            if (values[i] > values[i+1])
+            {
+                int temp = values[i];
+                values[i] = values[i+1];
+                values[i+1] = temp;
+                swapped += 1;
+            }
+        }
+    }
     return;
 }
