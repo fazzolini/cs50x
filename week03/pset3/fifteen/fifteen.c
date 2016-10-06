@@ -204,9 +204,16 @@ void draw(void)
     	// iterate through all tiles in a row
     	for (int col = 0; col < d; col++)
     	{
-    		// print tile depending on width
-    		// padding is given by tile_width
-            printf("%*i  ", tile_width, board[row][col]);    		
+            int current_value = board[row][col];
+            if (current_value == 0)
+            {
+                printf("%*c", tile_width, '_');
+            } else
+            {
+        		// print tile depending on width
+        		// padding is given by tile_width
+                printf("%*i  ", tile_width, current_value);
+            }		
     	}
     	// print ENDROW
     	printf("\n");
