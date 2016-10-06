@@ -164,12 +164,14 @@ void init(void)
     bool swap = (n_tiles % 2 == 0) ? false : true;
 
     // filling the board with numbers
+    int counter = 0;
     for (int row = 0; row < d; row++)
     {
     	// will fill 'empty' last one with 0
     	for (int col = 0; col < d; col++)
     	{
-    		board[row][col] = n_tiles - row - col;
+    		board[row][col] = n_tiles - counter;
+    		counter++;
     	}
     }
 
@@ -199,14 +201,15 @@ void draw(void)
     // iterating through all tiles
     for (int row = 0; row < d; row++)
     {
-    	//
+    	// iterate through all tiles in a row
     	for (int col = 0; col < d; col++)
     	{
-    		// print tile
-
-    		// print ENDCOL
+    		// print tile depending on width
+    		// padding is given by tile_width
+            printf("%*i  ", tile_width, board[row][col]);    		
     	}
     	// print ENDROW
+    	printf("\n");
     }
 }
 
