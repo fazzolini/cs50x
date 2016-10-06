@@ -159,7 +159,33 @@ void greet(void)
  */
 void init(void)
 {
-    // TODO
+    // decide if need to swap 2 and 1
+    int n_tiles = d * d - 1;
+    bool swap = (n_tiles % 2 == 0) ? false : true;
+
+    // filling the board with numbers
+    for (int row = 0; row < d; row++)
+    {
+    	// will fill 'empty' last one with 0
+    	for (int col = 0; col < d; col++)
+    	{
+    		board[row][col] = n_tiles - row - col;
+    	}
+    }
+
+    // perform swapping if needed
+    if (swap)
+    {
+    	board[d - 1][d - 2] = 2;
+    	board[d - 1][d - 3] = 1;
+    	printf("swapping\n");
+    	usleep(500000);
+    }
+    else
+    {
+    	printf("not swapping\n");
+    	usleep(500000);
+    }
 }
 
 /**
@@ -167,7 +193,21 @@ void init(void)
  */
 void draw(void)
 {
-    // TODO
+    // to make drawing equal-width
+    int tile_width = (d >= 3) ? 2 : 1;
+
+    // iterating through all tiles
+    for (int row = 0; row < d; row++)
+    {
+    	//
+    	for (int col = 0; col < d; col++)
+    	{
+    		// print tile
+
+    		// print ENDCOL
+    	}
+    	// print ENDROW
+    }
 }
 
 /**
