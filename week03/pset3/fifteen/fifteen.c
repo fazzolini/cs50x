@@ -286,6 +286,31 @@ bool move(int tile)
  */
 bool won(void)
 {
-    // TODO
-    return false;
+    int counter = 1;
+    for (int row = 0; row < d; row++)
+    {
+        for (int col = 0; col < d; col++)
+        {
+            printf("Checking %i-th element.\n", counter);
+            if (board[row][col] == counter)
+            {
+                printf("Order is RIGHT: %i = %i\n", counter, board[row][col]);
+            } else
+            {
+                // check if last element
+                if ((counter == d * d) && (board[row][col] == 0))
+                {
+                    printf("LAST element is RIGHT!\n");
+                    return true;
+                }
+                printf("Order is WRONG: %i != %i\n", counter, board[row][col]);
+                return false;
+            }
+            counter++;
+        }
+    }
+    // if passed all
+    printf("EVERYTNING IS RIGHT!!!\n");
+    usleep(1000000);
+    return true;
 }
