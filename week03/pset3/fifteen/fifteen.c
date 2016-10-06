@@ -32,6 +32,9 @@ int board[DIM_MAX][DIM_MAX];
 // dimensions
 int d;
 
+// these to store 'coordinates of the empty tile'
+int zero_row, zero_col;
+
 // prototypes
 void clear(void);
 void greet(void);
@@ -150,7 +153,8 @@ void greet(void)
 {
     clear();
     printf("WELCOME TO GAME OF FIFTEEN\n");
-    usleep(2000000);
+    // usleep(2000000);
+    usleep(500000);
 }
 
 /**
@@ -167,27 +171,31 @@ void init(void)
     int counter = 0;
     for (int row = 0; row < d; row++)
     {
-    	// will fill 'empty' last one with 0
-    	for (int col = 0; col < d; col++)
-    	{
-    		board[row][col] = n_tiles - counter;
-    		counter++;
-    	}
+        // will fill 'empty' last one with 0
+        for (int col = 0; col < d; col++)
+        {
+            board[row][col] = n_tiles - counter;
+            counter++;
+        }
     }
 
     // perform swapping if needed
     if (swap)
     {
-    	board[d - 1][d - 2] = 2;
-    	board[d - 1][d - 3] = 1;
-    	printf("swapping\n");
-    	usleep(500000);
+        board[d - 1][d - 2] = 2;
+        board[d - 1][d - 3] = 1;
+        printf("swapping\n");
+        usleep(500000);
     }
     else
     {
-    	printf("not swapping\n");
-    	usleep(500000);
+        printf("not swapping\n");
+        usleep(500000);
     }
+
+    // zero coordinates
+    zero_row = d - 1;
+    zero_col = d - 1;
 }
 
 /**
@@ -201,22 +209,22 @@ void draw(void)
     // iterating through all tiles
     for (int row = 0; row < d; row++)
     {
-    	// iterate through all tiles in a row
-    	for (int col = 0; col < d; col++)
-    	{
+        // iterate through all tiles in a row
+        for (int col = 0; col < d; col++)
+        {
             int current_value = board[row][col];
             if (current_value == 0)
             {
-                printf("%*c", tile_width, '_');
+                printf("%*c  ", tile_width, '_');
             } else
             {
-        		// print tile depending on width
-        		// padding is given by tile_width
+                // print tile depending on width
+                // padding is given by tile_width
                 printf("%*i  ", tile_width, current_value);
-            }		
-    	}
-    	// print ENDROW
-    	printf("\n");
+            }       
+        }
+        // print ENDROW
+        printf("\n");
     }
 }
 
@@ -226,7 +234,49 @@ void draw(void)
  */
 bool move(int tile)
 {
-    // TODO
+    int tile_row = -1;
+    int tile_col = -1;
+
+    // find coordinates of the tile
+    for (int row = 0; row < d; row++)
+    {
+        for (int col = 0; col < d; col++)
+        {
+            if (board[row][col] == tile)
+            {
+                printf("tile found!\n");
+                tile_row = row;
+                tile_col = col;
+            }
+        }
+    }
+
+    // if not found return false
+    if (tile_row == -1)
+    {
+        printf("tile not found!\n");
+        return false;
+    }
+
+    // check if coordinates are 'next to' zero tile
+    // if next then swap values
+    // very ugly boolean expression, but it works
+    if ( ( (abs(tile_row - zero_row) == 1) && (abs(tile_col - zero_col) == 0) ) ||
+       ( (abs(tile_row - zero_row) == 0) && (abs(tile_col - zero_col) == 1) ) )
+    {
+        // perform swapping
+        printf("tile can be moved!\n");
+        int temp = board[zero_row][zero_col];
+        board[zero_row][zero_col] = board[tile_row][tile_col];
+        board[tile_row][tile_col] = temp;
+        // update position of the zero tile
+        zero_row = tile_row;
+        zero_col = tile_col;
+        // return success
+        return true;
+    }
+
+    // not next to each other
     return false;
 }
 
