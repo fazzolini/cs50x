@@ -14,7 +14,7 @@
  * Note that usleep is obsolete, but it offers more granularity than
  * sleep and is simpler to use than nanosleep; `man usleep` for more.
  */
- 
+
 #define _XOPEN_SOURCE 500
 
 #include <cs50.h>
@@ -153,8 +153,7 @@ void greet(void)
 {
     clear();
     printf("WELCOME TO GAME OF FIFTEEN\n");
-    // usleep(2000000);
-    usleep(500000);
+    usleep(2000000);
 }
 
 /**
@@ -244,7 +243,7 @@ bool move(int tile)
         {
             if (board[row][col] == tile)
             {
-                printf("tile found!\n");
+                // printf("tile found!\n");
                 tile_row = row;
                 tile_col = col;
             }
@@ -254,7 +253,7 @@ bool move(int tile)
     // if not found return false
     if (tile_row == -1)
     {
-        printf("tile not found!\n");
+        // printf("tile not found!\n");
         return false;
     }
 
@@ -265,7 +264,7 @@ bool move(int tile)
        ( (abs(tile_row - zero_row) == 0) && (abs(tile_col - zero_col) == 1) ) )
     {
         // perform swapping
-        printf("tile can be moved!\n");
+        // printf("tile can be moved!\n");
         int temp = board[zero_row][zero_col];
         board[zero_row][zero_col] = board[tile_row][tile_col];
         board[tile_row][tile_col] = temp;
@@ -291,26 +290,26 @@ bool won(void)
     {
         for (int col = 0; col < d; col++)
         {
-            printf("Checking %i-th element.\n", counter);
+            // printf("Checking %i-th element.\n", counter);
             if (board[row][col] == counter)
             {
-                printf("Order is RIGHT: %i = %i\n", counter, board[row][col]);
+                // printf("Order is RIGHT: %i = %i\n", counter, board[row][col]);
             } else
             {
                 // check if last element
                 if ((counter == d * d) && (board[row][col] == 0))
                 {
-                    printf("LAST element is RIGHT!\n");
+                    // printf("LAST element is RIGHT!\n");
                     return true;
                 }
-                printf("Order is WRONG: %i != %i\n", counter, board[row][col]);
+                // printf("Order is WRONG: %i != %i\n", counter, board[row][col]);
                 return false;
             }
             counter++;
         }
     }
-    // if passed all
-    printf("EVERYTNING IS RIGHT!!!\n");
-    usleep(1000000);
+    // // if passed all
+    // printf("EVERYTNING IS RIGHT!!!\n");
+    // usleep(1000000);
     return true;
 }
