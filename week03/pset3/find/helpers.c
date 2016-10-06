@@ -16,7 +16,20 @@
  */
 bool search(int value, int values[], int n)
 {
-    // TODO: implement a searching algorithm
+    // check if n even makes sense
+    if (n <= 0)
+    {
+        return false;
+    }
+    // implementing a linear search algorithm
+    for (int i = 0; i < n; i++)
+    {
+        if (values[i] == value)
+        {
+            return true;
+        }
+    }
+    // not found
     return false;
 }
 
