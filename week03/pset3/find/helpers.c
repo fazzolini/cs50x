@@ -14,22 +14,40 @@
 /**
  * Returns true if value is in array of n values, else false.
  */
+int findMidPoint(int min, int max)
+{
+    return (min + max) / 2;
+}
+
+/**
+ * Non-recursive binary search
+ * Returns true if value is in array of n values, else false.
+ */
 bool search(int value, int values[], int n)
 {
-    // check if n even makes sense
-    if (n <= 0)
+    int min = 0;
+    int max = n - 1;
+    int midpoint;
+    while (min <= max)
     {
-        return false;
-    }
-    // implementing a linear search algorithm
-    for (int i = 0; i < n; i++)
-    {
-        if (values[i] == value)
+        midpoint = findMidPoint(min, max);
+        
+        if (value < values[midpoint])
         {
+            // go LEFT (modify max)
+            max = midpoint - 1;
+        }
+        else if (values[midpoint] < value)
+        {
+            // go RIGHT (modify min)
+            min = midpoint + 1;
+        }
+        else
+        {
+            // found element
             return true;
         }
     }
-    // not found
     return false;
 }
 
