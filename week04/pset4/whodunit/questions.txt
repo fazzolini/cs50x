@@ -1,12 +1,24 @@
-1.  TODO
-2.  TODO
-3.  TODO
-4.  TODO
-5.  TODO
-6.  TODO
-7.  TODO
-8.  TODO
-9.  TODO
-10. TODO
-11. TODO
-12. TODO
+1.  stdint.h is a standard library header file in C. It provides a variety of data types, specifically exact-width integers
+	that always take up the same number of bits and therefore they do not have padding zeros in between.Each type also
+	defines minimum and maximum values for that type.
+2.  the point of using these four data types that are defined in stdint.h is to allow data to be read no matter what sofware
+	and hardware platform is using these numbers. Using these formats means that there will be no padding zeros and numbers
+	always be the same length in bits. Using these numbers is the standard practice when working with writing data to a disk
+	or sending bits over network.
+3.  BYTE is 1 byte, DWORD is 4 bytes, LONG is 4 bytes, WORD is 2 bytes.
+4.  the first two bytes are 0x42 and 0x4d.
+5.  bfSize is the size of the whole file in bytes. biSize is the number of bytes required by the structure. In the case of
+	BITMAPINFOHEADER the value of biSize is 40 (bytes required for this header).
+6.  Negative value of biHeight means that the BMP picture starts in the upper left corner, so the first pixel in BMP represents
+	the upper-leftmost pixel in the picture and the last pixel in BMP will represent the rightmost-lowest pixel in the picture.
+7.  BITMAPINFOHEADER.biBitCount specifies the BMP's color depth in bits per pixel. Implementation of this problem set only
+	allows for 24-bit color depth.
+8.  fopen might return NULL if the file does not exist or the user does not have rights to read the file.
+9.  fread's third argument is 1 because this is how many "elements" we are reading in each case. We are reading in one
+	BITMAPFILEHEADER from the input file (on line 42) and then we are reading in one BITMAPINFOHEADER from the input file (on 
+	line 46).
+10. when bi.biWidth is 3, the value assigned will be three:
+	(4 - (3 * sizeof(RGBTRIPLE)) % 4) % 4 = (4 - (3 * 3) % 4) % 4 = (4 - 1) % 4 = 3.
+11. fseek() moves the file cursor position by the number of bytes stored in offset, it moves the cursor from where it was
+	before calling fseek() because the third parameter is SEEK_CUR.
+12. SEEK_CUR tells to fseek() where to start the movement of cursor, SEEK_CUR means current file cursor position.
