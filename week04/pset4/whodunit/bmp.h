@@ -34,7 +34,7 @@ typedef struct
     WORD bfReserved2; 
     DWORD bfOffBits; 
 } __attribute__((__packed__)) 
-BITMAPFILEHEADER; 
+BITMAPFILEHEADER;
 
 /**
  * BITMAPINFOHEADER
