@@ -74,7 +74,28 @@ int main(int argc, char *argv[])
             // reag RGB triple from infile
             fread(&triple, sizeof(RGBTRIPLE), 1, inputptr);
             
-            // TO DO: perform trnaformation on the triple
+            // if purely red -> make white
+            if (triple.rgbtRed == 0xff && 
+                triple.rgbtGreen == 0x00 &&
+                triple.rgbtBlue == 0x00)
+            {
+                triple.rgbtRed = 0xff;
+                triple.rgbtGreen = 0xff;
+                triple.rgbtBlue = 0xff;
+            }
+            
+            /*  after first transform
+                letters are barely visibly blue,
+                hence the second transform
+                if not white -> make black */
+            if (!(triple.rgbtRed == 0xff &&
+                  triple.rgbtGreen == 0xff &&
+                  triple.rgbtBlue == 0xff))
+            {
+                triple.rgbtRed = 0x00;
+                triple.rgbtGreen = 0x00;
+                triple.rgbtBlue = 0x00;
+            }
             
             // write updated RGB triple to outfile
             fwrite(&triple, sizeof(RGBTRIPLE), 1, outputptr);
