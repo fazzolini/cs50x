@@ -11,7 +11,7 @@
 // define bool
 typedef enum { false, true } bool;
 
-bool isInteger(char *number); // to check if n is indeed a digit
+bool isInteger(char *number); // to check if string is an int
 
 int main(int argc, char *argv[])
 {
@@ -92,12 +92,17 @@ int main(int argc, char *argv[])
     bi.biSizeImage = bi.biSizeImage; // no change for now
     bf.bfSize = bf.bfSize; // no change for now
 
-    // write outfile's BITMAPFILEHEADER
+    // write outfile's BITMAPFILEHEADER (which was changed above)
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
 
-    // write outfile's BITMAPINFOHEADER
+    // write outfile's BITMAPINFOHEADER (which was changed above)
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
+
+    /*  TO DO: implement scaling functionality
+        resize pixels in a row
+        resize rows
+        */
     // iterate over infile's scanlines
     for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
     {
@@ -134,7 +139,8 @@ int main(int argc, char *argv[])
     return 0;
 }
 
-
+/*  this function checks if a string is an int
+    */
 bool isInteger(char *number)
 {
     if (number[0] == '0' && strlen(number) == 1)
