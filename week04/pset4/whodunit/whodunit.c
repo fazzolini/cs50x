@@ -34,12 +34,12 @@ int main(int argc, char *argv[])
     }
     
     // read the BITMAPFILEHEADER
-    BITMAPINFOHEADER bf;
-    fread(&bf, sizeof(BITMAPINFOHEADER), 1, inputptr);
+    BITMAPFILEHEADER bf;
+    fread(&bf, sizeof(BITMAPFILEHEADER), 1, inputptr);
     
     // read the BITMAPINFOHEADER
-    BITMAPFILEHEADER bi;
-    fread(&bi, sizeof(BITMAPFILEHEADER), 1, inputptr);
+    BITMAPINFOHEADER bi;
+    fread(&bi, sizeof(BITMAPINFOHEADER), 1, inputptr);
     
     // enforce 24-bit color depth
     if (bf.bfType != 0x4d42 || bf.bfOffBits != 54 || bi.biSize != 40 ||
@@ -51,9 +51,51 @@ int main(int argc, char *argv[])
         return 4;
     }
     
-    // implement core functionality here
+    // update both headers for outfile
+    // first the BITMAPFILEHEADER
+    fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outputptr);
     
+    // then the BITMAPINFOHEADER
+    fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outputptr);
     
-    // if success
+    // determine padding if necessary
+    int padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    
+    // iterate over infile's scanlines and add padding if necessary
+    // this loop iterates through rows
+    for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
+    {
+        // this loop iterates trhrough pixels in each row
+        for (int j = 0, biWidth = bi.biWidth; j < biWidth; j++)
+        {
+            // temp storage to keep current pixel
+            RGBTRIPLE triple;
+            
+            // reag RGB triple from infile
+            fread(&triple, sizeof(RGBTRIPLE), 1, inputptr);
+            
+            // TO DO: perform trnaformation on the triple
+            
+            // write updated RGB triple to outfile
+            fwrite(&triple, sizeof(RGBTRIPLE), 1, outputptr);
+        }
+        
+        // skip over padding for reading further
+        fseek(inputptr, padding, SEEK_CUR);
+        
+        // write the padding to output file
+        for (int k=0; k<padding; k++)
+        {
+            fputc(0x00, outputptr);
+        }
+    }
+    
+    //close infile
+    fclose(inputptr);
+        
+    // close outfile
+    fclose(outputptr);
+    
+    // if success return
     return 0;
 }
