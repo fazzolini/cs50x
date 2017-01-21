@@ -4,21 +4,44 @@
        
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "bmp.h"
+
+// define bool
+typedef enum { false, true } bool;
+
+bool isInteger(char *number); // to check if n is indeed a digit
 
 int main(int argc, char *argv[])
 {
     // ensure proper usage
-    if (argc != 3)
+    if (argc != 4)
     {
-        fprintf(stderr, "Usage: ./copy infile outfile\n");
+        fprintf(stderr, "Usage: ./copy scale infile outfile\n");
         return 1;
     }
 
-    // remember filenames
-    char *infile = argv[1];
-    char *outfile = argv[2];
+    int n;
+    // make sure n is a valid integer and in the right interval
+    if (isInteger(argv[1]))
+    {
+        n = atoi(argv[1]);
+        fprintf(stdout, "n is %d\n", n);
+        if (n < 1 || n > 100)
+        {
+            fprintf(stderr, "Scale argument should be an integer from 1 to 100.\n");
+            return 43;
+        }
+        
+    } else
+    {
+        fprintf(stderr, "Scale argument is not a valid integer.\n");
+        return 42;
+    }
+
+    char *infile = argv[2];
+    char *outfile = argv[3];
 
     // open input file 
     FILE *inptr = fopen(infile, "r");
@@ -54,15 +77,26 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Unsupported file format.\n");
         return 4;
     }
+    
+    // determine input padding for scanlines
+    int in_padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    
+    /*  TO DO: change outfile's
+        biWidth: width of image in pixels (no padding)
+        biHeight: height of image in pixels
+        biSizeImage: total size of image (pixels + padding)
+        bfSize: total size of file
+        */
+    bi.biWidth *= n * bi.biWidth;
+    bi.biHeight *= n * bi.biHeight;
+    bi.biSizeImage = bi.biSizeImage; // no change for now
+    bf.bfSize = bf.bfSize; // no change for now
 
     // write outfile's BITMAPFILEHEADER
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
 
     // write outfile's BITMAPINFOHEADER
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
-
-    // determine padding for scanlines
-    int padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
 
     // iterate over infile's scanlines
     for (int i = 0, biHeight = abs(bi.biHeight); i < biHeight; i++)
@@ -80,11 +114,11 @@ int main(int argc, char *argv[])
             fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
         }
 
-        // skip over padding, if any
-        fseek(inptr, padding, SEEK_CUR);
+        // skip over input padding, if any
+        fseek(inptr, in_padding, SEEK_CUR);
 
         // then add it back (to demonstrate how)
-        for (int k = 0; k < padding; k++)
+        for (int k = 0; k < in_padding; k++)
         {
             fputc(0x00, outptr);
         }
@@ -98,4 +132,27 @@ int main(int argc, char *argv[])
 
     // success
     return 0;
+}
+
+
+bool isInteger(char *number)
+{
+    if (number[0] == '0' && strlen(number) == 1)
+    {
+        return true;
+    }
+    if (number[0] < 49 || number[0] > 57)
+    {
+        // fprintf(stderr, "The first argument is not a valid integer.\n");
+        return false;
+    }
+    for (int i=1, n=strlen(number); i < n; i++)
+    {
+        if ((number[i] < 48 || number[i] > 57))
+        {
+            // fprintf(stderr, "The first argument is not a valid integer.\n");
+            return false;
+        }
+    }
+    return true;
 }
