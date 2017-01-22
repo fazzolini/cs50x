@@ -12,6 +12,7 @@
 typedef enum { false, true } bool;
 
 bool isInteger(char *number); // to check if string is an int
+int getPadding(BITMAPINFOHEADER *bi); // calculate padding
 
 int main(int argc, char *argv[])
 {
@@ -79,7 +80,8 @@ int main(int argc, char *argv[])
     }
     
     // determine input padding for scanlines
-    int in_padding = (4 - (bi.biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    int in_padding = getPadding(&bi);
+    fprintf(stdout, "Padding before resize is %d\n", in_padding);
     
     /*  TO DO: change outfile's
         biWidth: width of image in pixels (no padding)
@@ -91,6 +93,10 @@ int main(int argc, char *argv[])
     bi.biHeight *= n * bi.biHeight;
     bi.biSizeImage = bi.biSizeImage; // no change for now
     bf.bfSize = bf.bfSize; // no change for now
+    
+    // new paddint for output scanline
+    // int out_padding = getPadding(&bi);
+    // fprintf(stdout, "Padding after resize is %d\n", in_padding);
 
     // write outfile's BITMAPFILEHEADER (which was changed above)
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
@@ -161,4 +167,15 @@ bool isInteger(char *number)
         }
     }
     return true;
+}
+
+
+/*  this function returns padding
+    parameter passed by reference
+    */
+int getPadding(BITMAPINFOHEADER *bi)
+{
+    int padding;
+    padding = (4 - ((*bi).biWidth * sizeof(RGBTRIPLE)) % 4) % 4;
+    return padding;
 }
