@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
     if (isInteger(argv[1]))
     {
         n = atoi(argv[1]);
-        fprintf(stdout, "n is %d\n", n);
+        // fprintf(stdout, "n is %d\n", n);
         if (n < 1 || n > 100)
         {
             fprintf(stderr, "Scale argument should be an integer from 1 to 100.\n");
@@ -40,9 +40,6 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Scale argument is not a valid integer.\n");
         return 42;
     }
-    
-    //for debugging
-    bool only_rows = true;
 
     char *infile = argv[2];
     char *outfile = argv[3];
@@ -85,13 +82,13 @@ int main(int argc, char *argv[])
     // determine input padding for scanlines
     int in_padding = getPadding(&bi);
     
-    /*-------------------*/
-    fprintf(stdout, "old width: %d\n", bi.biWidth);
-    fprintf(stdout, "old padding: %d\n", in_padding);
-    fprintf(stdout, "old height: %d\n", bi.biHeight);
-    fprintf(stdout, "old size of image: %d\n", bi.biSizeImage);
-    fprintf(stdout, "old size of file: %d\n", bf.bfSize);
-    /*-------------------*/
+    // /*-------------------*/
+    // fprintf(stdout, "old width: %d\n", bi.biWidth);
+    // fprintf(stdout, "old padding: %d\n", in_padding);
+    // fprintf(stdout, "old height: %d\n", bi.biHeight);
+    // fprintf(stdout, "old size of image: %d\n", bi.biSizeImage);
+    // fprintf(stdout, "old size of file: %d\n", bf.bfSize);
+    // /*-------------------*/
     
     // keep track of original height and width
     int oldWidth = bi.biWidth;
@@ -104,25 +101,22 @@ int main(int argc, char *argv[])
         +bfSize: total size of file
         */
     bi.biWidth = n * bi.biWidth;
-    if (!only_rows)
-    {
-        bi.biHeight = n * bi.biHeight;
-    }
+    bi.biHeight = n * bi.biHeight;
     
     // new paddint for output scanline
     int out_padding = getPadding(&bi); // uses new, updated bi.Width
-    fprintf(stdout, "Padding after resize is %d\n", out_padding);
+    // fprintf(stdout, "Padding after resize is %d\n", out_padding);
     
     bi.biSizeImage =  ((sizeof(RGBTRIPLE) * bi.biWidth) + out_padding) * abs(bi.biHeight);
     bf.bfSize =  bi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
 
-    /*-------------------*/
-    fprintf(stdout, "new width: %d\n", bi.biWidth);
-    fprintf(stdout, "new padding: %d\n", out_padding);
-    fprintf(stdout, "new height: %d\n", bi.biHeight);
-    fprintf(stdout, "new size of image: %d\n", bi.biSizeImage);
-    fprintf(stdout, "new size of file: %d\n", bf.bfSize);
-    /*-------------------*/
+    // /*-------------------*/
+    // fprintf(stdout, "new width: %d\n", bi.biWidth);
+    // fprintf(stdout, "new padding: %d\n", out_padding);
+    // fprintf(stdout, "new height: %d\n", bi.biHeight);
+    // fprintf(stdout, "new size of image: %d\n", bi.biSizeImage);
+    // fprintf(stdout, "new size of file: %d\n", bf.bfSize);
+    // /*-------------------*/
 
     // write outfile's BITMAPFILEHEADER (which was changed above)
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
@@ -131,37 +125,71 @@ int main(int argc, char *argv[])
     fwrite(&bi, sizeof(BITMAPINFOHEADER), 1, outptr);
 
     /*  TO DO: implement scaling functionality
-        resize pixels in a row (horizontal resizing)
-        -resize rows (vertical resizing)
+        +resize pixels in a row (horizontal resizing)
+        +resize rows (vertical resizing)
+        implementing RECOPY METHOD
         */
-    // iterate over infile's scanlines
+    
+    // for each row
     for (int i = 0; i < abs(oldHeight); i++)
     {
-        // iterate over pixels in scanline
-        for (int j = 0; j < oldWidth; j++)
+        // (1) for n-1 times
+        for (int j = 0; j < n-1; j++)
         {
-            // temporary storage
-            RGBTRIPLE triple;
+            // write pixels, padding to outfile
+            
+            // remember starting cursor position
+            long starting_cursor = ftell(inptr);
+            
+            // iterate through all pixels in scanline
+            for (int k = 0; k < oldWidth; k++)
+            {
+                // to store current pixel
+                RGBTRIPLE triple;
+                fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
+                
+                // writing read pixel n times to outfile (row resizing)
+                for (int l = 0; l < n; l++)
+                {
+                    // write RGB triple to outfile
+                    fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+                }                
+            }
 
-            // read RGB triple from infile
+            // then add output padding
+            for (int z = 0; z < out_padding; z++)
+            {
+                fputc(0x00, outptr);
+            }
+            
+            // send infile cursor back to start of scanline
+            fseek(inptr, starting_cursor, SEEK_SET);
+        }
+
+        // (2) write pixels, padding to outfile
+        // iterate through all pixels in scanline
+        for (int m = 0; m < oldWidth; m++)
+        {
+            // to store current pixel
+            RGBTRIPLE triple;
             fread(&triple, sizeof(RGBTRIPLE), 1, inptr);
-            // fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
+            
             // writing read pixel n times to outfile (row resizing)
-            for (int k = 0; k < n; k++)
+            for (int t = 0; t < n; t++)
             {
                 // write RGB triple to outfile
                 fwrite(&triple, sizeof(RGBTRIPLE), 1, outptr);
-            }
+            }                
         }
 
-        // skip over input padding, if any
-        fseek(inptr, in_padding, SEEK_CUR);
-
         // then add output padding
-        for (int l = 0; l < in_padding; l++)
+        for (int q = 0; q < out_padding; q++)
         {
             fputc(0x00, outptr);
         }
+        
+        // (3) skip over infile padding
+        fseek(inptr, in_padding, SEEK_CUR);
     }
 
     // close infile
