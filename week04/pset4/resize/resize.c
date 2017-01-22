@@ -83,20 +83,24 @@ int main(int argc, char *argv[])
     int in_padding = getPadding(&bi);
     fprintf(stdout, "Padding before resize is %d\n", in_padding);
     
+
+    
     /*  TO DO: change outfile's
         biWidth: width of image in pixels (no padding)
         biHeight: height of image in pixels
         biSizeImage: total size of image (pixels + padding)
         bfSize: total size of file
         */
-    bi.biWidth *= n * bi.biWidth;
-    bi.biHeight *= n * bi.biHeight;
-    bi.biSizeImage = bi.biSizeImage; // no change for now
-    bf.bfSize = bf.bfSize; // no change for now
+    bi.biWidth = n * bi.biWidth;
+    bi.biHeight = n * bi.biHeight;
     
     // new paddint for output scanline
-    // int out_padding = getPadding(&bi);
-    // fprintf(stdout, "Padding after resize is %d\n", in_padding);
+    int out_padding = getPadding(&bi); // uses new, updated bi.Width
+    fprintf(stdout, "Padding after resize is %d\n", out_padding);
+    
+    bi.biSizeImage =  ((sizeof(RGBTRIPLE) * bi.biWidth) + out_padding) * abs(bi.biHeight);
+    bf.bfSize =  bi.biSizeImage + sizeof(BITMAPFILEHEADER) + sizeof(BITMAPINFOHEADER);
+
 
     // write outfile's BITMAPFILEHEADER (which was changed above)
     fwrite(&bf, sizeof(BITMAPFILEHEADER), 1, outptr);
