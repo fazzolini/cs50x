@@ -32,7 +32,7 @@ int main(int argc, char *argv[])
         return 2;
     } else
     {
-        fprintf(stderr, "Successfully opened raw file \"%s\".\n", infile);
+        // fprintf(stderr, "Successfully opened raw file \"%s\".\n", infile);
     }
     
     // declaration for output
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
                 // close file and open the next one again
                 fclose(outptr);
                 jpeg_open = false;
-                fprintf(stderr, "Successfully closed \"%s\".\n", output_filename);
+                // fprintf(stderr, "Successfully closed \"%s\".\n", output_filename);
                 i++;
                 
                 // make a filename
@@ -78,8 +78,9 @@ int main(int argc, char *argv[])
                 if (outptr == NULL)
                 {
                     fprintf(stderr, "Could not open \"%s\" for writing.\n", output_filename);
+                    return 3;
                 } else {
-                    fprintf(stderr, "Successfully opened \"%s\" for writing.\n", output_filename);
+                    // fprintf(stderr, "Successfully opened \"%s\" for writing.\n", output_filename);
                 }
                 
                 // write current chunk to the open file
@@ -99,8 +100,9 @@ int main(int argc, char *argv[])
                 if (outptr == NULL)
                 {
                     fprintf(stderr, "Could not open \"%s\" for writing.\n", output_filename);
+                    return 3;
                 } else {
-                    fprintf(stderr, "Successfully opened \"%s\" for writing.\n", output_filename);
+                    // fprintf(stderr, "Successfully opened \"%s\" for writing.\n", output_filename);
                 }
                 
                 // write current chunk to the open file
@@ -129,7 +131,7 @@ int main(int argc, char *argv[])
     
     // close file from which we were reading
     fclose(inptr);
-    fprintf(stderr, "Successfully closed raw file \"%s\".\n", infile);
+    // fprintf(stderr, "Successfully closed raw file \"%s\".\n", infile);
     
     // finish: finita la commedia
     
