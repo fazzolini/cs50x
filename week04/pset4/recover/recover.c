@@ -83,6 +83,7 @@ int main(int argc, char *argv[])
                 }
                 
                 // write current chunk to the open file
+                fwrite(buffer, BUFFER_SIZE, 1, outptr);
             } else 
             {
                 // if not writing
@@ -103,6 +104,7 @@ int main(int argc, char *argv[])
                 }
                 
                 // write current chunk to the open file
+                fwrite(buffer, BUFFER_SIZE, 1, outptr);
             }
         } else
         {
@@ -112,6 +114,7 @@ int main(int argc, char *argv[])
             {
                 // if writing
                 // write current block
+                fwrite(buffer, BUFFER_SIZE, 1, outptr);
             } else
             {
                 // if not writing
