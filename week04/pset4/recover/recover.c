@@ -28,9 +28,15 @@ int main(int argc, char *argv[])
     // check for possible error
     if (inptr == NULL)
     {
-        fprintf(stderr, "Could not open the file.\n");
+        fprintf(stderr, "Could not open raw file \"%s\".\n", infile);
         return 2;
+    } else
+    {
+        fprintf(stderr, "Successfully opened raw file \"%s\".\n", infile);
     }
+    
+    // declaration for output
+    FILE *outptr;
     
     // make a buffer to store pieces of data stream
     BYTE buffer[BUFFER_SIZE];
@@ -45,23 +51,84 @@ int main(int argc, char *argv[])
     int i = 0;
     while (fread(&buffer, BUFFER_SIZE, 1, inptr))
     {
+        // check if this block is .jpg
         if (buffer[0] == 0xff &&
             buffer[1] == 0xd8 &&
             buffer[2] == 0xff &&
             (buffer[3] & 0xf0) == 0xe0)
         {
-            // make a filename for output
-            sprintf(output_filename, "%03d.jpg", i);
-            // print output filename
-            fprintf(stdout, "%s\n", output_filename);
-            
-            jpeg_open = true;
-            
-            
-            
-            i++;
+            // starts as jpg:
+            // check if currently writing to .jpg
+            if (jpeg_open)
+            {
+                // if writing
+                // close file and open the next one again
+                fclose(outptr);
+                jpeg_open = false;
+                fprintf(stderr, "Successfully closed \"%s\".\n", output_filename);
+                i++;
+                
+                // make a filename
+                sprintf(output_filename, "%03d.jpg", i);
+                
+                // open the file to write
+                outptr = fopen(output_filename, "w");
+                jpeg_open = true;
+                // check if allright
+                if (outptr == NULL)
+                {
+                    fprintf(stderr, "Could not open \"%s\" for writing.\n", output_filename);
+                } else {
+                    fprintf(stderr, "Successfully opened \"%s\" for writing.\n", output_filename);
+                }
+                
+                // write current chunk to the open file
+            } else 
+            {
+                // if not writing
+                // then open new one
+                
+                // make a filename
+                sprintf(output_filename, "%03d.jpg", i);
+                
+                // open the file to write
+                outptr = fopen(output_filename, "w");
+                jpeg_open = true;
+                // check if allright
+                if (outptr == NULL)
+                {
+                    fprintf(stderr, "Could not open \"%s\" for writing.\n", output_filename);
+                } else {
+                    fprintf(stderr, "Successfully opened \"%s\" for writing.\n", output_filename);
+                }
+                
+                // write current chunk to the open file
+            }
+        } else
+        {
+            // if chunk does not start as .jpg
+            // then check if currently writing
+            if (jpeg_open)
+            {
+                // if writing
+                // write current block
+            } else
+            {
+                // if not writing
+                // do nothing
+            }
         }
     }
+    
+    // close .jpg file to which we were writing
+    fclose(outptr);
+    jpeg_open = false;
+    
+    // close file from which we were reading
+    fclose(inptr);
+    fprintf(stderr, "Successfully closed raw file \"%s\".\n", infile);
+    
+    // finish: finita la commedia
     
     // if OK return 0
     return 0;
