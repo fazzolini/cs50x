@@ -4,8 +4,8 @@
 
 #include <ctype.h>
 #include <stdio.h>
-#include <sys/resource.h>
-#include <sys/time.h>
+#include <sys/resource.h> // for rusage
+#include <sys/time.h> //  for rusage
 
 #include "dictionary.h"
 #undef calculate
@@ -27,7 +27,7 @@ int main(int argc, char *argv[])
     }
 
     // structs for timing data
-    struct rusage before, after;
+    struct rusage before, after; // define 2 structs: before and after on one line
 
     // benchmarks
     double time_load = 0.0, time_check = 0.0, time_size = 0.0, time_unload = 0.0;
@@ -36,8 +36,8 @@ int main(int argc, char *argv[])
     char* dictionary = (argc == 3) ? argv[1] : DICTIONARY;
 
     // load dictionary
-    getrusage(RUSAGE_SELF, &before);
-    bool loaded = load(dictionary);
+    getrusage(RUSAGE_SELF, &before); // RUSAGE_SELF: calculate for current process only
+    bool loaded = load(dictionary); // >> TO DO 1 <<
     getrusage(RUSAGE_SELF, &after);
 
     // abort if dictionary not loaded
@@ -51,12 +51,12 @@ int main(int argc, char *argv[])
     time_load = calculate(&before, &after);
 
     // try to open text
-    char *text = (argc == 3) ? argv[2] : argv[1];
+    char *text = (argc == 3) ? argv[2] : argv[1]; // string
     FILE *fp = fopen(text, "r");
     if (fp == NULL)
     {
         printf("Could not open %s.\n", text);
-        unload();
+        unload(); // >> TO DO 2 <<
         return 1;
     }
 
@@ -65,13 +65,13 @@ int main(int argc, char *argv[])
 
     // prepare to spell-check
     int index = 0, misspellings = 0, words = 0;
-    char word[LENGTH+1];
+    char word[LENGTH+1]; // LEGTH is 45 (in dictionary.h), +1 to store \0
 
     // spell-check each word in text
-    for (int c = fgetc(fp); c != EOF; c = fgetc(fp))
+    for (int c = fgetc(fp); c != EOF; c = fgetc(fp)) // increments by getting next char until EOF
     {
         // allow only alphabetical characters and apostrophes
-        if (isalpha(c) || (c == '\'' && index > 0))
+        if (isalpha(c) || (c == '\'' && index > 0)) // isalpha(c) checks if alphabetic
         {
             // append character to word
             word[index] = c;
@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
             if (index > LENGTH)
             {
                 // consume remainder of alphabetical string
-                while ((c = fgetc(fp)) != EOF && isalpha(c));
+                while ((c = fgetc(fp)) != EOF && isalpha(c)); // skips until not character
 
                 // prepare for new word
                 index = 0;
@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
         else if (isdigit(c))
         {
             // consume remainder of alphanumeric string
-            while ((c = fgetc(fp)) != EOF && isalnum(c));
+            while ((c = fgetc(fp)) != EOF && isalnum(c)); // skips until not alphanumeric
 
             // prepare for new word
             index = 0;
@@ -109,7 +109,8 @@ int main(int argc, char *argv[])
 
             // check word's spelling
             getrusage(RUSAGE_SELF, &before);
-            bool misspelled = !check(word);
+            // basically MISSPELLED = NOT IN DICTIONARY
+            bool misspelled = !check(word); // >> TO DO 3 <<
             getrusage(RUSAGE_SELF, &after);
 
             // update benchmark
@@ -141,7 +142,7 @@ int main(int argc, char *argv[])
 
     // determine dictionary's size
     getrusage(RUSAGE_SELF, &before);
-    unsigned int n = size();
+    unsigned int n = size(); // >> TO DO 4 <<
     getrusage(RUSAGE_SELF, &after);
 
     // calculate time to determine dictionary's size
@@ -188,6 +189,15 @@ double calculate(const struct rusage *b, const struct rusage *a)
     }
     else
     {
+        /** tv_sec: the whole number of secs
+         * tv_usec: the whole number of microseconds
+         * ru_utime: user CPU time used
+         * ru_stime: system CPU time used
+         * struct rusage: https://linux.die.net/man/2/getrusage
+         * struct timeval: https://www.gnu.org/software/libc/manual/html_node/Elapsed-Time.html
+         * ---
+         * returns user_cpu_time_used + system_cpu_time_used (in seconds)
+         */
         return ((((a->ru_utime.tv_sec * 1000000 + a->ru_utime.tv_usec) -
                  (b->ru_utime.tv_sec * 1000000 + b->ru_utime.tv_usec)) +
                 ((a->ru_stime.tv_sec * 1000000 + a->ru_stime.tv_usec) -
