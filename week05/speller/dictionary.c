@@ -45,9 +45,7 @@ void print_child_ptrs(node *trie_node); // print addresses of pointers
 bool check(const char *word)
 {
     // TODO
-    printf("root address is: %p\n", root);
-    printf("root value is %d\n", root->is_word);
-    return false;
+    return true;
 }
 
 /**
@@ -164,15 +162,42 @@ void add_word(node *trie_root, char *word)
         // if node exists
         if (cursor->children[child_index] != NULL)
         {
-            fprintf(stdout, "node for %c exists, going deeper...\n\n", word[i]);
-            cursor = cursor->children[child_index];
+            // check if last letter
+            if (i == n - 1)
+            {
+                fprintf(stdout, "node for %c exists, going deeper...\n", word[i]);
+                cursor = cursor->children[child_index];
+                fprintf(stdout, "%c is the LAST letter of the word, changing to \'true\'\n\n", word[i]);
+                cursor->is_word = true;
+
+            }
+            else
+            {
+                fprintf(stdout, "node for %c exists, going deeper...\n\n", word[i]);
+                cursor = cursor->children[child_index];                
+            }
         }
         else
         {
-            fprintf(stdout, "node for %c doesn't exist, creating new node...\n", word[i]);
-            cursor->children[child_index] = malloc(sizeof(node));
-            fprintf(stdout, "node for %c exists now, going deeper...\n\n", word[i]);
-            cursor = cursor->children[child_index];
+            // check if last letter
+            if (i == n - 1)
+            {
+                fprintf(stdout, "no node for %c, creating new node...\n", word[i]);
+                cursor->children[child_index] = malloc(sizeof(node));
+                fprintf(stdout, "node for %c exists now, going deeper...\n", word[i]);
+                cursor = cursor->children[child_index];
+                fprintf(stdout, "%c is the LAST letter of the word, changing to \'true\'\n\n", word[i]);
+                cursor->is_word = true;
+            }
+            else
+            {
+                fprintf(stdout, "no node for %c, creating new node...\n", word[i]);
+                cursor->children[child_index] = malloc(sizeof(node));
+                fprintf(stdout, "node for %c exists now, going deeper...\n", word[i]);
+                cursor = cursor->children[child_index];
+                fprintf(stdout, "writing default is_word for new node to \'false\'\n\n");
+                cursor->is_word = false;
+            }
         }
     }
     for (int i = 0; i < 80; i++) printf("-");
