@@ -67,19 +67,17 @@ bool load(const char *dictionary)
     root = malloc(sizeof(node));
     root -> is_word = false;
     
-    // check if pointers in children are all NULL
-    // print_child_ptrs(root);
-    
     char *word = malloc(sizeof(int) * LENGTH);
     
     char *w = "abba";
     fprintf(stdout, "\nTest word is: %s\n", w);
     
-    test_get_child_index();
+    // test_get_child_index();
     
     while(fscanf(inptr, "%s", word) != EOF)
     {
         fprintf(stdout, "word is %s\n", word);
+        add_word(root, word);
     }
     
     return false;
@@ -156,5 +154,27 @@ void test_get_child_index()
  */
 void add_word(node *trie_root, char *word)
 {
-    
+    node *cursor = root;
+    fprintf(stdout, "Adding the word \'%s\'\n\n", word);
+    for (int i = 0, n = strlen(word); i < n; i++)
+    {
+        int child_index = get_child_index(word[i]);
+        fprintf(stdout, "Char is %c, index is %d\n", word[i], child_index);
+        
+        // if node exists
+        if (cursor->children[child_index] != NULL)
+        {
+            fprintf(stdout, "node for %c exists, going deeper...\n\n", word[i]);
+            cursor = cursor->children[child_index];
+        }
+        else
+        {
+            fprintf(stdout, "node for %c doesn't exist, creating new node...\n", word[i]);
+            cursor->children[child_index] = malloc(sizeof(node));
+            fprintf(stdout, "node for %c exists now, going deeper...\n\n", word[i]);
+            cursor = cursor->children[child_index];
+        }
+    }
+    for (int i = 0; i < 80; i++) printf("-");
+    printf("\n\n");
 }
