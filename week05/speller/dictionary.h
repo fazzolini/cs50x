@@ -10,6 +10,7 @@
 // maximum length for a word
 // (e.g., pneumonoultramicroscopicsilicovolcanoconiosis)
 #define LENGTH 45
+#define ALEPH 27 // alphabet length (26 letters + ')
 
 /**
  * Returns true if word is in dictionary else false.
