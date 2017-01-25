@@ -1,3 +1,4 @@
+// ./speller dictionaries/small texts/alice.txt
 /**----------------------------------------------------------------------------
  * Do all imports
  */
@@ -10,9 +11,6 @@
 /**----------------------------------------------------------------------------
  * Define structs
  */
-// boolean type
-typedef enum { false, true } bool;
-
 // define a node for trie
 typedef struct _node
 {
@@ -44,7 +42,7 @@ bool check(const char *word)
 {
     // TODO
     printf("root address is: %p\n", root);
-    printf("root value is %d\n", *root);
+    printf("root value is %d\n", root->is_word);
     return false;
 }
 
@@ -54,9 +52,22 @@ bool check(const char *word)
 bool load(const char *dictionary)
 {
     // TODO
+    // open dict for reading
+    // while there are words
+    // print word
+    FILE *inptr = fopen(dictionary, "r");
+    if (inptr == NULL)
+    {
+        fprintf(stderr, "Could not open the dictionary.\n");
+        return 1;
+    }
     
-    root = malloc(sizeof(int));
-    *root = 42;
+    char *word = malloc(sizeof(int) * LENGTH);
+    
+    while(fscanf(inptr, "%s", word) != EOF)
+    {
+        fprintf(stdout, "word is %s\n", word);
+    }
     
     return false;
 }
