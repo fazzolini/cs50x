@@ -1,7 +1,48 @@
-0.  TODO
-1.  TODO
-2.  TODO
-3.  TODO
-4.  TODO
-5.  TODO
-6.  TODO
+0.  The word in question is a type of lung disease also known as silicosis. It
+	is also the longest word in the English language. It is 45 characters long.
+	I think this motivates `#define LENGTH 45` in the header file dictionary.h
+1.  getrusage() is a function that returns resource usage measures stored in a
+	struct rusage {}. In the problem set this function is used to calculate the
+	amount of time in seconds that was required to complete various stages of
+	spelling check. In order to use this function, two header files need to be
+	imcluded in a program:
+		- sys/time.h
+		- sys/resource.h
+2.  struct rusage {} has 16 members (according to the man page in CS50 IDE).
+3.  Even though we are not changing any values of before and after rusage
+	structs, it is still better to pass by reference because the program will
+	not make copies of these structs, which will save memory and time.
+4.  main() goes about reading all words on a character-by-character basis.
+	Structure that is responsible for is a for loop. This for loop loops
+	through all characters until it reaches the end of the file EOF. Note that
+	the increment step for this loop is `c = fgetc(fp)` that returns the next
+	character from the file (pointed at by the FILE pointer fp) and then moves
+	the file position indicator to the next position. Inside of the loop, for
+	each character there is a complex if-else statement with 3 conditions:
+		(1) if the character is alphabetic (or has ' that is not in the
+		beginning of the word, then append it to the current word
+			- after, if the length of the current word is greater than 45,
+			  skip all the alphabetic characters until the next non-alphabetic
+			  character or EOF and reset index to 0 (overwrites current word)
+		(2) else if the character is a digit, skip through all alphanumeric
+		characters until the next non-alphabetic character or EOF (overwrites
+		current word)
+		(3) if the (1) and (2) are not true then this must be true that this is
+		the end of the current word (if index > 0; index indicates the 'cursor'
+		position in the current word). In this case finish the word with '\0',
+		ncrease words counter by one, check if it is in the dictionary, and if
+		not, print it on screen. Also, calculate how much time was taken for
+		lookup in dictionary.
+5.  fscanf() is not a good choice, because it will read words separated by white-
+	space characters and as such it might include digits and punctuation
+	characters in the words that is returns. To avoid this, we could check each
+	word returned by fscanf() character by character to ensure that there are
+	no digits and punctuation characters, and also that the words are no longer
+	than 45. But we are already doing all these checks when reading one char at
+	a time! So why add additional complexity?
+6.  using const is a safety precaution. Because we pass by reference and do not
+	necessarily know implementation of the said functions, we can make sure
+	that nothing will be changed in structs that we pass by prepending variable
+	type with `const`. Because check() and load() do not need to change passed
+	objects, it is a good practice to ensure they will not be inadvertently 
+	changed in implementation.
