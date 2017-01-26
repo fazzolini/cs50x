@@ -1,4 +1,5 @@
-// ./speller dictionaries/small texts/alice.txt
+// ./speller dictionaries/small texts/austinpowers.txt
+// ./speller texts/austinpowers.txt
 /**----------------------------------------------------------------------------
  * Do all imports
  */
@@ -25,6 +26,7 @@ node;
  * Global vars to be accessed by all methods
  */
 node *root;
+bool debug = false;
 
 /** ---------------------------------------------------------------------------
  * prototypes
@@ -44,8 +46,37 @@ void print_child_ptrs(node *trie_node); // print addresses of pointers
  */
 bool check(const char *word)
 {
-    // TODO
-    return true;
+    if (debug) printf("Checking if word \'%s\' is in the trie\n\n", word);
+    node *cursor = root;
+    int n = strlen(word);
+    // check all letters before last one
+    for (int i = 0; i < n - 1; i++)
+    {
+        int child_index = get_child_index(word[i]);
+        if (cursor->children[child_index] != NULL)
+        {
+            if (debug) printf("%d: %c is in trie, going deeper\n", i+1, word[i]);
+            cursor = cursor->children[child_index];
+        }
+        else
+        {
+            if (debug) printf("Word is NOT IN DICTIONARY\n\n");
+            return false;
+        }
+    }
+    // check last letter
+    int last_child_index = get_child_index(word[n - 1]);
+    if (cursor->children[last_child_index])
+    {
+        if (debug) printf("Last letter \'%c\' is in trie, checking if endword\n", word[n - 1]);
+        if (cursor->children[last_child_index]->is_word == true)
+        {
+            if (debug) printf("Word is IN DICTIONARY ^__^\n\n");
+            return true;
+        }
+    }
+    if (debug) printf("Word is NOT IN DICTIONARY\n\n");
+    return false;
 }
 
 /**
@@ -68,17 +99,37 @@ bool load(const char *dictionary)
     char *word = malloc(sizeof(int) * LENGTH);
     
     char *w = "abba";
-    fprintf(stdout, "\nTest word is: %s\n", w);
+    if (debug) fprintf(stdout, "\nTest word is: %s\n", w);
     
     // test_get_child_index();
     
     while(fscanf(inptr, "%s", word) != EOF)
     {
-        fprintf(stdout, "word is %s\n", word);
+        if (debug) fprintf(stdout, "word is %s\n", word);
         add_word(root, word);
     }
     
-    return false;
+    // char *cat = "cat";
+    // char *car = "car";
+    // char *pil = "caterpillar";
+    // printf("Checking %s:\n", cat);
+    // check(cat);
+    // printf("Checking %s:\n", car);
+    // check(car);
+    // printf("Checking %s:\n", pil);
+    // check(pil);
+    // printf("Checking %s:\n", "hobby");
+    // check("hobby");
+    
+    if (debug)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
+    
 }
 
 /**
@@ -96,7 +147,14 @@ unsigned int size(void)
 bool unload(void)
 {
     // TODO
-    return false;
+    if (debug)
+    {
+        return false;
+    }
+    else
+    {
+        return true;
+    }
 }
 
 /**
@@ -108,11 +166,11 @@ void print_child_ptrs(node *trie_node)
     {
         if (trie_node->children[i] == NULL)
         {
-            fprintf(stdout, "%d: NULL\n", i);
+            if (debug) fprintf(stdout, "%d: NULL\n", i);
         }
         else
         {
-            fprintf(stdout, "%d: %p\n", i, trie_node->children[i]);
+            if (debug) fprintf(stdout, "%d: %p\n", i, trie_node->children[i]);
         }
     }
 }
@@ -153,11 +211,11 @@ void test_get_child_index()
 void add_word(node *trie_root, char *word)
 {
     node *cursor = root;
-    fprintf(stdout, "Adding the word \'%s\'\n\n", word);
+    if (debug) fprintf(stdout, "Adding the word \'%s\'\n\n", word);
     for (int i = 0, n = strlen(word); i < n; i++)
     {
         int child_index = get_child_index(word[i]);
-        fprintf(stdout, "Char is %c, index is %d\n", word[i], child_index);
+        if (debug) fprintf(stdout, "Char is %c, index is %d\n", word[i], child_index);
         
         // if node exists
         if (cursor->children[child_index] != NULL)
@@ -165,15 +223,15 @@ void add_word(node *trie_root, char *word)
             // check if last letter
             if (i == n - 1)
             {
-                fprintf(stdout, "node for %c exists, going deeper...\n", word[i]);
+                if (debug) fprintf(stdout, "node for %c exists, going deeper...\n", word[i]);
                 cursor = cursor->children[child_index];
-                fprintf(stdout, "%c is the LAST letter of the word, changing to \'true\'\n\n", word[i]);
+                if (debug) fprintf(stdout, "%c is the LAST letter of the word, changing to \'true\'\n\n", word[i]);
                 cursor->is_word = true;
 
             }
             else
             {
-                fprintf(stdout, "node for %c exists, going deeper...\n\n", word[i]);
+                if (debug) fprintf(stdout, "node for %c exists, going deeper...\n\n", word[i]);
                 cursor = cursor->children[child_index];                
             }
         }
@@ -182,24 +240,27 @@ void add_word(node *trie_root, char *word)
             // check if last letter
             if (i == n - 1)
             {
-                fprintf(stdout, "no node for %c, creating new node...\n", word[i]);
+                if (debug) fprintf(stdout, "no node for %c, creating new node...\n", word[i]);
                 cursor->children[child_index] = malloc(sizeof(node));
-                fprintf(stdout, "node for %c exists now, going deeper...\n", word[i]);
+                if (debug) fprintf(stdout, "node for %c exists now, going deeper...\n", word[i]);
                 cursor = cursor->children[child_index];
-                fprintf(stdout, "%c is the LAST letter of the word, changing to \'true\'\n\n", word[i]);
+                if (debug) fprintf(stdout, "%c is the LAST letter of the word, changing to \'true\'\n\n", word[i]);
                 cursor->is_word = true;
             }
             else
             {
-                fprintf(stdout, "no node for %c, creating new node...\n", word[i]);
+                if (debug) fprintf(stdout, "no node for %c, creating new node...\n", word[i]);
                 cursor->children[child_index] = malloc(sizeof(node));
-                fprintf(stdout, "node for %c exists now, going deeper...\n", word[i]);
+                if (debug) fprintf(stdout, "node for %c exists now, going deeper...\n", word[i]);
                 cursor = cursor->children[child_index];
-                fprintf(stdout, "writing default is_word for new node to \'false\'\n\n");
+                if (debug) fprintf(stdout, "writing default is_word for new node to \'false\'\n\n");
                 cursor->is_word = false;
             }
         }
     }
-    for (int i = 0; i < 80; i++) printf("-");
-    printf("\n\n");
+    if (debug)
+    {
+        for (int i = 0; i < 80; i++) printf("-");
+    }
+    if (debug) printf("Added word \'%s\' to the trie\n\n", word);
 }
