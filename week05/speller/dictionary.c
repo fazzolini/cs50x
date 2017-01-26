@@ -35,6 +35,8 @@ ref;
  */
 node *root;
 bool debug = false;
+bool shortcut = true; // if true will calculate size of dict while loading the dict
+int size_of_dict = 0; // for calculating size of dict while loading dict
 
 /** ---------------------------------------------------------------------------
  * prototypes
@@ -123,24 +125,33 @@ bool load(const char *dictionary)
  */
 unsigned int size(void)
 {
-    int i = 0;
-    
-    ref *start = malloc(sizeof(ref));
-    start->trie_node = root;
-    while (start != NULL)
+    if (shortcut)
     {
-        if (start->trie_node->is_word == true) i++;
-        for (int i = 0; i < ALEPH; i++)
-        {
-            if (start->trie_node->children[i] != NULL)
-            {
-                // adding pointer to node to list of nodes
-                add_ref(start, start->trie_node->children[i]);
-            }
-        }
-        start = pop_a_node(start); // removes first element if list of refs
+        // printf("SHORTCUT: printing size of dict: %d\n\n", size_of_dict);
+        return size_of_dict;
     }
-    return i;
+    // more hardcore and slow way to calculate size of dict
+    else
+    {
+        int i = 0;
+        
+        ref *start = malloc(sizeof(ref));
+        start->trie_node = root;
+        while (start != NULL)
+        {
+            if (start->trie_node->is_word == true) i++;
+            for (int i = 0; i < ALEPH; i++)
+            {
+                if (start->trie_node->children[i] != NULL)
+                {
+                    // adding pointer to node to list of nodes
+                    add_ref(start, start->trie_node->children[i]);
+                }
+            }
+            start = pop_a_node(start); // removes first element if list of refs
+        }
+        return i;
+    }
 }
 
 /**
@@ -225,6 +236,7 @@ void add_word(node *trie_root, char *word)
             {
                 cursor = cursor->children[child_index];
                 cursor->is_word = true;
+                size_of_dict++;
 
             }
             else
@@ -240,6 +252,7 @@ void add_word(node *trie_root, char *word)
                 cursor->children[child_index] = malloc(sizeof(node));
                 cursor = cursor->children[child_index];
                 cursor->is_word = true;
+                size_of_dict++;
             }
             else
             {
