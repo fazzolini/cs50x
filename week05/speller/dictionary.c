@@ -22,6 +22,14 @@ typedef struct _node
 }
 node;
 
+// to make a linked list of pointers to nodes in trie
+typedef struct _ref
+{
+    node *trie_node;
+    struct _ref *next;
+}
+ref;
+
 /**----------------------------------------------------------------------------
  * Global vars to be accessed by all methods
  */
@@ -35,6 +43,8 @@ int get_child_index(int c); // return index in trie based on character
 void test_get_child_index();
 void add_word(node *trie_root, char *word); // add word to trie
 void print_child_ptrs(node *trie_node); // print addresses of pointers
+void add_ref(ref *start, node* t_node); // adds ref to linked list
+ref * pop_a_node(ref *start); // frees 1st element of linked list
 
 /**----------------------------------------------------------------------------
  * ----------------------------------------------------------------------------
@@ -113,8 +123,24 @@ bool load(const char *dictionary)
  */
 unsigned int size(void)
 {
-    // TODO
-    return 0;
+    int i = 0;
+    
+    ref *start = malloc(sizeof(ref));
+    start->trie_node = root;
+    while (start != NULL)
+    {
+        if (start->trie_node->is_word == true) i++;
+        for (int i = 0; i < ALEPH; i++)
+        {
+            if (start->trie_node->children[i] != NULL)
+            {
+                // adding pointer to node to list of nodes
+                add_ref(start, start->trie_node->children[i]);
+            }
+        }
+        start = pop_a_node(start); // removes first element if list of refs
+    }
+    return i;
 }
 
 /**
@@ -223,4 +249,34 @@ void add_word(node *trie_root, char *word)
             }
         }
     }
+}
+
+/**
+ * takes a pointer to linked list of refs
+ * and a pointer to trie node
+ * and adss the pointer to trie node
+ * to the SECOND POSITION of linked list
+ * of refs
+ */
+void add_ref(ref *start, node* t_node)
+{
+    ref *new_ref = malloc(sizeof(ref));
+    new_ref->trie_node = t_node;
+    new_ref->next = start->next;
+    start->next = new_ref;
+}
+
+
+/**
+ * returns a pointer to the first
+ * pointer to trie node in list of
+ * refs, removes the first node from
+ * list of refs, frees memory
+ */
+ref * pop_a_node(ref *start)
+{
+    ref *cursor = start; // pointer for freeing memory
+    ref * result = start->next;
+    free(cursor);
+    return result;
 }
