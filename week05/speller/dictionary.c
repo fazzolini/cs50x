@@ -34,7 +34,7 @@ ref;
  * Global vars to be accessed by all methods
  */
 node *root;
-bool debug = false;
+bool debug = false; // for debugging
 bool shortcut = true; // if true will calculate size of dict while loading the dict
 int size_of_dict = 0; // for calculating size of dict while loading dict
 
@@ -46,7 +46,8 @@ void test_get_child_index();
 void add_word(node *trie_root, char *word); // add word to trie
 void print_child_ptrs(node *trie_node); // print addresses of pointers
 void add_ref(ref *start, node* t_node); // adds ref to linked list
-ref * pop_a_node(ref *start); // frees 1st element of linked list
+ref * pop_a_ref_node(ref *start); // frees 1st element of linked list
+void pop_a_trie_node(node *t_node); // frees t_node
 
 /**----------------------------------------------------------------------------
  * ----------------------------------------------------------------------------
@@ -99,15 +100,18 @@ bool load(const char *dictionary)
     }
     
     // initialize root node of trie
-    root = malloc(sizeof(node));
+    root = calloc(1,sizeof(node));
     root -> is_word = false;
     
-    char *word = malloc(sizeof(int) * LENGTH);
+    char *word = calloc(1,sizeof(int) * LENGTH);
     
     while(fscanf(inptr, "%s", word) != EOF)
     {
         add_word(root, word);
     }
+    
+    free(word);
+    fclose(inptr);
     
     if (debug)
     {
@@ -148,8 +152,9 @@ unsigned int size(void)
                     add_ref(start, start->trie_node->children[i]);
                 }
             }
-            start = pop_a_node(start); // removes first element if list of refs
+            start = pop_a_ref_node(start); // removes first element if list of refs
         }
+        free(start);
         return i;
     }
 }
@@ -166,6 +171,23 @@ bool unload(void)
     }
     else
     {
+        ref *start = calloc(1,sizeof(ref));
+        start->trie_node = root;
+        // make a linked list of refs to all nodes in trie
+        while (start != NULL)
+        {
+            for (int i = 0; i < ALEPH; i++)
+            {
+                if (start->trie_node->children[i] != NULL)
+                {
+                    // adding pointer to node to list of nodes
+                    add_ref(start, start->trie_node->children[i]);
+                }
+            }
+            pop_a_trie_node(start->trie_node); // free the node in trie
+            start = pop_a_ref_node(start); // free first element if list of refs
+        }
+        free(start);
         return true;
     }
 }
@@ -249,14 +271,14 @@ void add_word(node *trie_root, char *word)
             // check if last letter
             if (i == n - 1)
             {
-                cursor->children[child_index] = malloc(sizeof(node));
+                cursor->children[child_index] = calloc(1,sizeof(node));
                 cursor = cursor->children[child_index];
                 cursor->is_word = true;
                 size_of_dict++;
             }
             else
             {
-                cursor->children[child_index] = malloc(sizeof(node));
+                cursor->children[child_index] = calloc(1,sizeof(node));
                 cursor = cursor->children[child_index];
                 cursor->is_word = false;
             }
@@ -273,7 +295,7 @@ void add_word(node *trie_root, char *word)
  */
 void add_ref(ref *start, node* t_node)
 {
-    ref *new_ref = malloc(sizeof(ref));
+    ref *new_ref = calloc(1,sizeof(ref));
     new_ref->trie_node = t_node;
     new_ref->next = start->next;
     start->next = new_ref;
@@ -286,10 +308,15 @@ void add_ref(ref *start, node* t_node)
  * refs, removes the first node from
  * list of refs, frees memory
  */
-ref * pop_a_node(ref *start)
+ref * pop_a_ref_node(ref *start)
 {
     ref *cursor = start; // pointer for freeing memory
     ref * result = start->next;
     free(cursor);
     return result;
+}
+
+void pop_a_trie_node(node *t_node) // frees t_node
+{
+    free(t_node);
 }
