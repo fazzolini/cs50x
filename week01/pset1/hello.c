@@ -15,6 +15,6 @@
 int main(void)
 {
 
-    printf("hello, world\n");
+    printf("Hello, world!\n");
     
 }
