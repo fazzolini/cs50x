@@ -39,6 +39,7 @@ int main(int argc, string argv[])
 	if (is_valid_integer_string(argv[1]))
 	{
 	    shift = atoi(argv[1]);
+	    shift = shift % 26;
 	} else 
 	{
 		printf("Your command-line argument was not in an integer-convertible form.\n");
@@ -46,9 +47,11 @@ int main(int argc, string argv[])
 	}
 
 	// get user's string input
+	printf("plaintext:");
 	string s = GetString();
 
 	// perform conversion itself
+	printf("ciphertext:");
 	for (int i = 0, n = strlen(s); i < n; i++)
 	{
 		char original_char = s[i];
