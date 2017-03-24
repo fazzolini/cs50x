@@ -52,9 +52,11 @@ int main(int argc, string argv[])
     }
 
 	// get user's string input
+	printf("plaintext:");
 	string s = GetString();
 
 	// perform conversion itself
+	printf("ciphertext:");
 	for (int i = 0, n = strlen(s), j = 0; i < n; i++)
 	{
 		char original_char = s[i];
