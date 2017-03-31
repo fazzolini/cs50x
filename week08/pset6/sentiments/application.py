@@ -1,9 +1,44 @@
 from flask import Flask, redirect, render_template, request, url_for
 
+import sys
+import os
+
 import helpers
 from analyzer import Analyzer
 
+N_TWEETS = 100
+
 app = Flask(__name__)
+
+def get_scores(tweets):
+    # absolute paths to lists
+    positives = os.path.join(sys.path[0], "positive-words.txt")
+    negatives = os.path.join(sys.path[0], "negative-words.txt")
+
+    # instantiate analyzer
+    analyzer = Analyzer(positives, negatives)
+    
+    # initial scores
+    n_pos = 0.0
+    n_neg = 0.0
+    n_neut = 0.0
+    
+    # iterate throught tweets
+    for t in tweets:
+        score = analyzer.analyze(t)
+        if score > 0.0:
+            n_pos += 1
+        elif score < 0.0:
+            n_neg += 1
+        else:
+            n_neut += 1
+            
+    # final scores
+    n_pos /= N_TWEETS
+    n_neg /= N_TWEETS
+    n_neut /= N_TWEETS
+    
+    return n_pos, n_neg, n_neut
 
 @app.route("/")
 def index():
@@ -18,10 +53,11 @@ def search():
         return redirect(url_for("index"))
 
     # get screen_name's tweets
-    tweets = helpers.get_user_timeline(screen_name)
+    tweets = helpers.get_user_timeline(screen_name, count=N_TWEETS)
 
     # TODO
-    positive, negative, neutral = 0.0, 0.0, 100.0
+    # color print
+    positive, negative, neutral = get_scores(tweets)
 
     # generate chart
     chart = helpers.chart(positive, negative, neutral)
