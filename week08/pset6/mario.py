@@ -26,6 +26,7 @@ def main():
     
     print_pyramid(h)
     
+    return 0
     
 if __name__ == "__main__":
     main()
