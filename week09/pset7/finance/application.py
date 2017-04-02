@@ -33,7 +33,7 @@ db = SQL("sqlite:///finance.db")
 @app.route("/")
 @login_required
 def index():
-    return apology("TODO")
+    return apology("index not implemented as of yet")
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
@@ -101,7 +101,46 @@ def quote():
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """Register user."""
-    return apology("TODO")
+    if request.method == "POST":
+        # TO DO
+        # require a username, apology if blank or the username already exists
+        if not request.form.get("username"):
+            return apology("must provide username")
+        
+        # store username (lowercase) for later use
+        anon = request.form.get("username").lower()
+        
+        # check if username already exists
+        users = db.execute("SELECT * FROM users WHERE username = :username", username=anon)
+        if len(users) != 0:
+            return apology("such anon already exists")
+            
+        # password cannot be empty
+        if not request.form.get("password") and not request.form.get("password2"):
+            return apology("must provide password")
+        
+        # password twice, apology if blank or do not match
+        if not request.form.get("password") or \
+        not request.form.get("password2") or \
+        request.form.get("password") != request.form.get("password2"):
+            return apology("passwords do not match")
+
+        ## INSERT the new user into users, storing a hash of the user’s password, not the password itself
+        pwd_hash=pwd_context.encrypt(request.form.get("password"))
+        
+        db.execute("INSERT INTO users (username, hash) VALUES(:uname, :pwd)", uname=anon, pwd=pwd_hash)
+        
+        ## 2 options if register successful
+            ## then automatically login (good user experience)
+            ## redirect to login (worse user experience, easier to implement)
+
+        # # redirect user to home page
+        # return redirect(url_for("index"))
+        return redirect(url_for("login"))
+        # return apology("{}, you are Anon now!".format(anon))
+    else:
+        # if GET then offer to register
+        return render_template("register.html")
 
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
