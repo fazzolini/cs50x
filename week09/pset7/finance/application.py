@@ -125,19 +125,16 @@ def register():
         request.form.get("password") != request.form.get("password2"):
             return apology("passwords do not match")
 
-        ## INSERT the new user into users, storing a hash of the user’s password, not the password itself
+        ## INSERT new user into users, storing hash of user’s password, not password itself
         pwd_hash=pwd_context.encrypt(request.form.get("password"))
-        
         db.execute("INSERT INTO users (username, hash) VALUES(:uname, :pwd)", uname=anon, pwd=pwd_hash)
         
         ## 2 options if register successful
-            ## then automatically login (good user experience)
+            ## automatically login (good user experience)
             ## redirect to login (worse user experience, easier to implement)
 
-        # # redirect user to home page
-        # return redirect(url_for("index"))
+        # redirect user to login page
         return redirect(url_for("login"))
-        # return apology("{}, you are Anon now!".format(anon))
     else:
         # if GET then offer to register
         return render_template("register.html")
