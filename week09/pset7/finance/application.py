@@ -56,7 +56,7 @@ def summarize_stocks(transactions_dict):
 @login_required
 def index():
     # retreive current cash for user
-    anon_cash = usd(db.execute("SELECT cash FROM users WHERE id = :u_id", u_id=session["user_id"])[0]['cash'])
+    anon_cash = db.execute("SELECT cash FROM users WHERE id = :u_id", u_id=session["user_id"])[0]['cash']
     
     #retreive all transactions of user
     anon_transactions = db.execute("SELECT * FROM transactions WHERE user_id = :u_id", u_id=session["user_id"])
@@ -66,6 +66,7 @@ def index():
             
     # now create final list to be displayed on index
     stocks = []
+    total_worth = anon_cash
     for symbol in sorted(stocks_summarized.keys()):
         # get current price
         symbol_data = lookup(symbol)
@@ -78,10 +79,13 @@ def index():
         symbol_dict["price"] = usd(symbol_data["price"])
         symbol_dict["total"] = usd(stocks_summarized[symbol] * symbol_data["price"])
         
+        # add to total worth
+        total_worth += stocks_summarized[symbol] * symbol_data["price"]
+        
         if symbol_dict["shares"] != 0:
             stocks.append(symbol_dict)
         
-    return render_template("index.html", stocks=stocks, cash=anon_cash)
+    return render_template("index.html", stocks=stocks, cash=usd(anon_cash), value=usd(total_worth))
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
@@ -131,7 +135,11 @@ def buy():
 @login_required
 def history():
     """Show history of transactions."""
-    return apology("TODO")
+    anon_transactions = db.execute("SELECT * FROM transactions WHERE user_id = :u_id", u_id=session["user_id"])
+    for t in anon_transactions:
+        t["total"] = usd(abs(t["price"] * t["quantity"]))
+        t["price"] = usd(t["price"])
+    return render_template("history.html", stocks = anon_transactions)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -189,7 +197,7 @@ def quote():
             return apology("something wrong with data provider")
         else:
             name = stock_data["name"]
-            price = stock_data["price"]
+            price = usd(stock_data["price"])
             symbol = stock_data["symbol"]
         return render_template("quoted.html", name=name, price=price, symbol=symbol)
     else:
