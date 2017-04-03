@@ -38,6 +38,13 @@ def is_int(s):
     except ValueError:
         return False
         
+def is_float(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+        
 def summarize_stocks(transactions_dict):
     """
     calculates total number of shares for each company
@@ -130,6 +137,24 @@ def buy():
     else:
         # return apology("buy template...")
         return render_template("buy.html")
+        
+@app.route("/addcash", methods=["GET", "POST"])
+@login_required
+def add_cash():
+    if request.method == "POST":
+        amount = request.form.get("amount")
+        if not is_float(amount):
+            return apology("not a valid number")
+        amount = float(amount)
+        if amount < 0:
+            return apology("can't add negative")
+        
+        # update user cash
+        db.execute("UPDATE users SET cash = cash + :amount WHERE id = :u_id", amount=amount, u_id=session["user_id"])
+        
+        return redirect(url_for("index"))
+    else:
+        return render_template("addcash.html")
 
 @app.route("/history")
 @login_required
