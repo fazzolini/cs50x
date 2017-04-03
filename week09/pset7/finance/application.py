@@ -33,7 +33,7 @@ db = SQL("sqlite:///finance.db")
 @app.route("/")
 @login_required
 def index():
-    return apology("index not implemented as of yet")
+    return apology("you are logged in to index", "index is under development")
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
@@ -132,9 +132,20 @@ def register():
         ## 2 options if register successful
             ## automatically login (good user experience)
             ## redirect to login (worse user experience, easier to implement)
+            
+        # log the user in automatically
+        # query database for username
+        rows = db.execute("SELECT * FROM users WHERE username = :username", username=anon)
 
-        # redirect user to login page
-        return redirect(url_for("login"))
+        # ensure username exists and password is correct (just in case)
+        if len(rows) != 1 or not pwd_context.verify(request.form.get("password"), pwd_hash):
+            return apology("something went wrong")
+
+        # remember which user has logged in
+        session["user_id"] = rows[0]["id"]
+        
+        # redirect user to home page
+        return redirect(url_for("index"))
     else:
         # if GET then offer to register
         return render_template("register.html")
