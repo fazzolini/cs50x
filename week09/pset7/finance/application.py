@@ -30,6 +30,14 @@ Session(app)
 # configure CS50 Library to use SQLite database
 db = SQL("sqlite:///finance.db")
 
+# check if string is an int
+def is_int(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
+
 @app.route("/")
 @login_required
 def index():
@@ -38,8 +46,47 @@ def index():
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
 def buy():
-    """Buy shares of stock."""
-    return apology("TODO")
+    if request.method == "POST":
+        # validate symbol
+        stock_data = lookup(request.form.get("symbol"))
+        if not stock_data:
+            return apology("no data for this symbol")
+        elif len(stock_data) != 3:
+            return apology("something wrong with data provider")
+        else:
+            name = stock_data["name"]
+            price = stock_data["price"]
+            symbol = stock_data["symbol"]
+            
+        # validate number of shares
+        if not is_int(request.form.get("n_shares")) or int(request.form.get("n_shares")) < 1:
+            return apology("number of shares must be", "a positive integer")
+        else:
+            n_shares = int(request.form.get("n_shares"))
+        
+        # retreive user cash
+        user_cash = db.execute("SELECT cash FROM users WHERE id = :u_id", u_id=session["user_id"])[0]['cash']
+        
+        # calculate transaction value
+        trans_value = n_shares * price
+        
+        # make sure they have enough cash
+        if user_cash < trans_value:
+            return apology("insufficient funds")
+        
+        # make record
+        db.execute("INSERT INTO transactions (user_id, symbol, quantity, price) VALUES (:u_id, :symbol, :qty, :price)", \
+        u_id=session["user_id"], symbol=symbol, qty=n_shares, price=price)
+        
+        # update user cash
+        db.execute("UPDATE users SET cash = cash - :t_value WHERE id = :u_id", t_value=trans_value, u_id=session["user_id"])
+        
+        # redirect the user to the index
+        return redirect(url_for("index"))
+        return apology("nicely done")
+    else:
+        # return apology("buy template...")
+        return render_template("buy.html")
 
 @app.route("/history")
 @login_required
