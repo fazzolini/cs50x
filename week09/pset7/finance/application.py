@@ -300,6 +300,15 @@ def sell():
             return apology("number of shares must be", "a positive integer")
         else:
             n_shares = int(request.form.get("n_shares"))
+            
+        # get how many shares user already has
+        anon_transactions = db.execute("SELECT * FROM transactions WHERE user_id = :u_id", u_id=session["user_id"])
+        # make a dict with sybbols and total values
+        stocks_summarized = summarize_stocks(anon_transactions)
+        if symbol not in stocks_summarized:
+            return apology("you don't own these shares")
+        if stocks_summarized[symbol] < n_shares:
+            return apology("you don't have this many shares")
         
         # calculate transaction value
         trans_value = n_shares * price
