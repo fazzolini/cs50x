@@ -41,7 +41,41 @@ def is_int(s):
 @app.route("/")
 @login_required
 def index():
-    return apology("you are logged in to index", "index is under development")
+    # retreive current cash for user
+    anon_cash = usd(db.execute("SELECT cash FROM users WHERE id = :u_id", u_id=session["user_id"])[0]['cash'])
+    
+    #retreive all transactions of user
+    anon_transactions = db.execute("SELECT * FROM transactions WHERE user_id = :u_id", u_id=session["user_id"])
+    
+    # make a dict with sybbols and total values
+    stocks_summarized = {}
+    for t in anon_transactions:
+        if t["symbol"] not in stocks_summarized:
+            stocks_summarized[t["symbol"]] = t["quantity"]
+        else:
+            stocks_summarized[t["symbol"]] += t["quantity"]
+            
+    # now create final list to be displayed on index
+    stocks = []
+    for symbol in sorted(stocks_summarized.keys()):
+        symbol_data = lookup(symbol)
+        
+        symbol_dict = {}
+        symbol_dict["symbol"] = symbol
+        symbol_dict["name"] = symbol_data["name"]
+        symbol_dict["shares"] = stocks_summarized[symbol]
+        symbol_dict["price"] = usd(symbol_data["price"])
+        symbol_dict["total"] = usd(stocks_summarized[symbol] * symbol_data["price"])
+        
+        stocks.append(symbol_dict)
+        
+    
+    # stocks = [{"symbol": "AAPL",
+    #             "name": "Apple",
+    #             "shares": 10,
+    #             "price": 143,
+    #             "total": 1430}]
+    return render_template("index.html", stocks=stocks, cash=anon_cash)
 
 @app.route("/buy", methods=["GET", "POST"])
 @login_required
@@ -83,7 +117,6 @@ def buy():
         
         # redirect the user to the index
         return redirect(url_for("index"))
-        return apology("nicely done")
     else:
         # return apology("buy template...")
         return render_template("buy.html")
