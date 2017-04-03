@@ -37,6 +37,20 @@ def is_int(s):
         return True
     except ValueError:
         return False
+        
+def summarize_stocks(transactions_dict):
+    """
+    calculates total number of shares for each company
+    based on transactions dictionary
+    """
+    stocks_summarized = {}
+    for t in transactions_dict:
+        if t["symbol"] not in stocks_summarized:
+            stocks_summarized[t["symbol"]] = t["quantity"]
+        else:
+            stocks_summarized[t["symbol"]] += t["quantity"]
+    return stocks_summarized
+    
 
 @app.route("/")
 @login_required
@@ -48,18 +62,15 @@ def index():
     anon_transactions = db.execute("SELECT * FROM transactions WHERE user_id = :u_id", u_id=session["user_id"])
     
     # make a dict with sybbols and total values
-    stocks_summarized = {}
-    for t in anon_transactions:
-        if t["symbol"] not in stocks_summarized:
-            stocks_summarized[t["symbol"]] = t["quantity"]
-        else:
-            stocks_summarized[t["symbol"]] += t["quantity"]
+    stocks_summarized = summarize_stocks(anon_transactions)
             
     # now create final list to be displayed on index
     stocks = []
     for symbol in sorted(stocks_summarized.keys()):
+        # get current price
         symbol_data = lookup(symbol)
         
+        # create data for output in portfolio
         symbol_dict = {}
         symbol_dict["symbol"] = symbol
         symbol_dict["name"] = symbol_data["name"]
@@ -67,14 +78,9 @@ def index():
         symbol_dict["price"] = usd(symbol_data["price"])
         symbol_dict["total"] = usd(stocks_summarized[symbol] * symbol_data["price"])
         
-        stocks.append(symbol_dict)
+        if symbol_dict["shares"] != 0:
+            stocks.append(symbol_dict)
         
-    
-    # stocks = [{"symbol": "AAPL",
-    #             "name": "Apple",
-    #             "shares": 10,
-    #             "price": 143,
-    #             "total": 1430}]
     return render_template("index.html", stocks=stocks, cash=anon_cash)
 
 @app.route("/buy", methods=["GET", "POST"])
@@ -244,5 +250,36 @@ def register():
 @app.route("/sell", methods=["GET", "POST"])
 @login_required
 def sell():
-    """Sell shares of stock."""
-    return apology("TODO")
+    if request.method == "POST":
+        # validate symbol
+        stock_data = lookup(request.form.get("symbol"))
+        if not stock_data:
+            return apology("no data for this symbol")
+        elif len(stock_data) != 3:
+            return apology("something wrong with data provider")
+        else:
+            name = stock_data["name"]
+            price = stock_data["price"]
+            symbol = stock_data["symbol"]
+            
+        # validate number of shares
+        if not is_int(request.form.get("n_shares")) or int(request.form.get("n_shares")) < 1:
+            return apology("number of shares must be", "a positive integer")
+        else:
+            n_shares = int(request.form.get("n_shares"))
+        
+        # calculate transaction value
+        trans_value = n_shares * price
+        
+        # make record
+        db.execute("INSERT INTO transactions (user_id, symbol, quantity, price) VALUES (:u_id, :symbol, :qty, :price)", \
+        u_id=session["user_id"], symbol=symbol, qty=-n_shares, price=price)
+        
+        # update user cash
+        db.execute("UPDATE users SET cash = cash + :t_value WHERE id = :u_id", t_value=trans_value, u_id=session["user_id"])
+        
+        # redirect the user to the index
+        return redirect(url_for("index"))
+    else:
+        # return apology("buy template...")
+        return render_template("sell.html")
