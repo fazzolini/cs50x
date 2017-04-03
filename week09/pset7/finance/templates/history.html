@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    History
+{% endblock %}
+
+{% block main %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Time</th>
+                <th>Symbol</th>
+                <th>Quantity</th>
+                <th>Price</th>
+                <th>TOTAL</th>
+            </tr>
+        </thead>
+        <!--<tfoot>-->
+        <!--    <tr>-->
+        <!--        <th colspan="4">TOTAL</th>-->
+        <!--        <th>{{ cash }}</th>-->
+        <!--    </tr>-->
+        <!--</tfoot>-->
+        <tbody>
+            {% for stock in stocks %}
+            <tr>
+                <td>{{ stock.timestamp }}</td>
+                <td>{{ stock.symbol }}</td>
+                <td>{{ stock.quantity }}</td>
+                <td>{{ stock.price }}</td>
+                <td>{{ stock.total }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
